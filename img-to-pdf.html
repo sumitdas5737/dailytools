@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Images to PDF – Notebook Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --surface: #ffffff;
+      --surface-soft: #f9fafb;
+      --border: #e5e7eb;
+      --border-soft: #d1d5db;
+      --text-main: #111827;
+      --text-soft: #6b7280;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      display: flex;
+      padding: 24px;
+      justify-content: center;
+    }
+
+    .app-shell {
+      max-width: 1100px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-pill {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .title-block p {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: var(--text-soft);
+    }
+
+    .meta-badge {
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background-color: var(--surface);
+      color: var(--text-soft);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    a.back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    a.back-link:hover {
+      text-decoration: underline;
+    }
+
+    .main {
+      display: grid;
+      grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .card {
+      background-color: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border);
+      padding: 18px 18px 20px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-soft);
+      margin-bottom: 12px;
+    }
+
+    .field-group {
+      margin-bottom: 12px;
+    }
+
+    .field-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .field-label span.hint {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    input[type="file"] {
+      width: 100%;
+      font-size: 13px;
+      border-radius: var(--radius-md);
+      padding: 6px 9px;
+      border: 1px solid var(--border-soft);
+      background-color: var(--surface-soft);
+      color: var(--text-main);
+      outline: none;
+    }
+
+    input[type="file"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.2);
+    }
+
+    .status {
+      font-size: 11px;
+      margin-top: 4px;
+      color: var(--text-soft);
+    }
+
+    .status.ok {
+      color: #15803d;
+    }
+
+    .status.error {
+      color: #b91c1c;
+    }
+
+    button {
+      border-radius: 999px;
+      border: 1px solid transparent;
+      padding: 9px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.12s ease, border-color 0.12s ease, transform 0.05s ease,
+        box-shadow 0.12s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .btn-primary:hover {
+      background-color: #1d4ed8;
+      border-color: #1d4ed8;
+      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background-color: #ffffff;
+      color: var(--text-main);
+      border-color: var(--border-soft);
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--surface-soft);
+      border-color: var(--border);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .preview-header h2 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+      max-height: 520px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .preview-item {
+      border-radius: 10px;
+      border: 1px solid var(--border-soft);
+      background-color: var(--surface-soft);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      font-size: 11px;
+      cursor: move;
+      position: relative;
+      transition: box-shadow 0.12s ease, border-color 0.12s ease, transform 0.08s ease;
+    }
+
+    .preview-item.dragging {
+      opacity: 0.6;
+      transform: scale(0.98);
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.15);
+    }
+
+    .preview-item.drag-over {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent-soft);
+    }
+
+    .preview-item img {
+      width: 100%;
+      height: 130px;
+      object-fit: contain;
+      background-color: #f3f4f6;
+    }
+
+    .preview-meta {
+      padding: 6px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .preview-meta span {
+      color: var(--text-soft);
+      font-size: 11px;
+    }
+
+    .handle {
+      font-size: 11px;
+      color: var(--text-soft);
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px dashed var(--border-soft);
+      background-color: #ffffff;
+    }
+
+    .page-number-badge {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      background: rgba(15, 23, 42, 0.8);
+      color: #f9fafb;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 999px;
+    }
+
+    .empty-state {
+      font-size: 13px;
+      color: var(--text-soft);
+      padding: 20px;
+      text-align: center;
+      border-radius: 12px;
+      border: 1px dashed var(--border-soft);
+      background-color: var(--surface-soft);
+    }
+
+    @media (max-width: 900px) {
+      .main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 16px;
+      }
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- Header -->
+  <header class="header">
+    <div class="title-block">
+      <!-- BACK BUTTON -->
+<button class="back-btn" onclick="goHome()">← Back to home</button>
+
+<style>
+  .back-btn {
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    color: #111827;
+    font-family: system-ui, sans-serif;
+    font-size: 14px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    transition: 0.15s ease;
+  }
+
+  .back-btn:hover {
+    background: #e8f0ff;
+    border-color: #2563eb;
+    color: #2563eb;
+    transform: translateY(-1px);
+  }
+</style>
+
+<script>
+  function goHome() {
+    window.location.href = "index.html"; 
+  }
+</script>
+
+      <h1>
+        Images to PDF
+        <span class="title-pill">Notebook pages</span>
+      </h1>
+      <p>Select your exported notebook images, drag to reorder pages, and generate a single PDF file.</p>
+    </div>
+    <div>
+      <div class="meta-badge">
+        <span>All processing in browser</span>
+        <span>•</span>
+        <span>Multi-page PDF</span>
+      </div>
+      <div style="text-align:right;margin-top:4px;">
+        <a href="index.html" class="back-link">← Back to Notebook Writer</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Left: controls -->
+    <section class="card">
+      <div class="section-title">Select images</div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Notebook page images</span>
+          <span class="hint">PNG / JPG (multi-select allowed)</span>
+        </div>
+        <input type="file" id="imageInput" accept="image/*" multiple />
+        <div id="imageStatus" class="status">No images selected.</div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>PDF filename</span>
+          <span class="hint">Without extension</span>
+        </div>
+        <input
+          type="text"
+          id="pdfName"
+          placeholder="notebook-pages"
+          style="width:100%;font-size:13px;border-radius:var(--radius-md);padding:7px 9px;border:1px solid var(--border-soft);background-color:var(--surface-soft);outline:none;"
+        />
+      </div>
+
+      <button id="generatePdfBtn" class="btn-primary">
+        📄 Generate PDF
+      </button>
+      <button id="clearBtn" class="btn-secondary">
+        🧹 Clear selection
+      </button>
+
+      <div id="generateStatus" class="status" style="margin-top:8px;"></div>
+    </section>
+
+    <!-- Right: preview -->
+    <section class="card">
+      <div class="preview-header">
+        <h2>Preview & reorder (drag)</h2>
+        <span id="countLabel" style="font-size:12px;color:var(--text-soft);">0 pages</span>
+      </div>
+      <div id="previewContainer" class="preview-grid">
+        <!-- thumbnails go here -->
+      </div>
+      <div id="emptyState" class="empty-state">
+        No images yet. Select one or more PNG/JPG files on the left.  
+        Then drag the thumbnails to reorder pages before generating the PDF.
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- jsPDF for PDF creation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+  const imageInput       = document.getElementById("imageInput");
+  const imageStatus      = document.getElementById("imageStatus");
+  const previewContainer = document.getElementById("previewContainer");
+  const emptyState       = document.getElementById("emptyState");
+  const countLabel       = document.getElementById("countLabel");
+  const generatePdfBtn   = document.getElementById("generatePdfBtn");
+  const clearBtn         = document.getElementById("clearBtn");
+  const generateStatus   = document.getElementById("generateStatus");
+  const pdfNameInput     = document.getElementById("pdfName");
+
+  let images = []; // { file, url }
+  let dragSourceIndex = null;
+
+  function refreshPreview() {
+    previewContainer.innerHTML = "";
+
+    if (images.length === 0) {
+      emptyState.style.display = "block";
+      countLabel.textContent = "0 pages";
+      return;
+    }
+    emptyState.style.display = "none";
+    countLabel.textContent = images.length + (images.length === 1 ? " page" : " pages");
+
+    images.forEach((imgObj, index) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "preview-item";
+      wrapper.draggable = true;
+      wrapper.dataset.index = index;
+
+      // Drag events
+      wrapper.addEventListener("dragstart", handleDragStart);
+      wrapper.addEventListener("dragover", handleDragOver);
+      wrapper.addEventListener("dragleave", handleDragLeave);
+      wrapper.addEventListener("drop", handleDrop);
+      wrapper.addEventListener("dragend", handleDragEnd);
+
+      const badge = document.createElement("div");
+      badge.className = "page-number-badge";
+      badge.textContent = "Page " + (index + 1);
+
+      const img = document.createElement("img");
+      img.src = imgObj.url;
+      img.alt = "Page " + (index + 1);
+
+      const meta = document.createElement("div");
+      meta.className = "preview-meta";
+
+      const span = document.createElement("span");
+      span.textContent = imgObj.file.name.length > 16
+        ? imgObj.file.name.slice(0, 14) + "…"
+        : imgObj.file.name;
+
+      const handle = document.createElement("span");
+      handle.className = "handle";
+      handle.textContent = "Drag to reorder";
+
+      meta.appendChild(span);
+      meta.appendChild(handle);
+
+      wrapper.appendChild(badge);
+      wrapper.appendChild(img);
+      wrapper.appendChild(meta);
+      previewContainer.appendChild(wrapper);
+    });
+  }
+
+  function handleDragStart(e) {
+    dragSourceIndex = Number(this.dataset.index);
+    this.classList.add("dragging");
+    e.dataTransfer.effectAllowed = "move";
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    this.classList.add("drag-over");
+  }
+
+  function handleDragLeave() {
+    this.classList.remove("drag-over");
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    this.classList.remove("drag-over");
+    const targetIndex = Number(this.dataset.index);
+    if (dragSourceIndex === null || dragSourceIndex === targetIndex) return;
+
+    const [moved] = images.splice(dragSourceIndex, 1);
+    images.splice(targetIndex, 0, moved);
+    dragSourceIndex = null;
+    refreshPreview();
+  }
+
+  function handleDragEnd() {
+    this.classList.remove("dragging");
+    const items = document.querySelectorAll(".preview-item");
+    items.forEach(item => item.classList.remove("drag-over"));
+  }
+
+  imageInput.addEventListener("change", function () {
+    const files = Array.from(this.files || []);
+    images.forEach(obj => URL.revokeObjectURL(obj.url));
+    images = [];
+
+    files.forEach(file => {
+      if (!file.type.startsWith("image/")) return;
+      const url = URL.createObjectURL(file);
+      images.push({ file, url });
+    });
+
+    if (images.length === 0) {
+      imageStatus.textContent = "No valid images selected.";
+      imageStatus.className = "status error";
+    } else {
+      imageStatus.textContent = images.length + " image(s) selected.";
+      imageStatus.className = "status ok";
+    }
+
+    generateStatus.textContent = "";
+    refreshPreview();
+  });
+
+  clearBtn.addEventListener("click", () => {
+    images.forEach(obj => URL.revokeObjectURL(obj.url));
+    images = [];
+    imageInput.value = "";
+    imageStatus.textContent = "No images selected.";
+    imageStatus.className = "status";
+    generateStatus.textContent = "";
+    refreshPreview();
+  });
+
+  async function createPdfFromImages() {
+    if (images.length === 0) {
+      generateStatus.textContent = "Please select at least one image.";
+      generateStatus.className = "status error";
+      return;
+    }
+
+    generateStatus.textContent = "Generating PDF...";
+    generateStatus.className = "status";
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4"
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    for (let i = 0; i < images.length; i++) {
+      const imgObj = images[i];
+      const imgDataUrl = await fileToDataURL(imgObj.file);
+      const dims = await getImageDimensions(imgDataUrl);
+
+      const imgWidth = dims.width;
+      const imgHeight = dims.height;
+
+      const ratio = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
+      const pdfWidth = imgWidth * ratio;
+      const pdfHeight = imgHeight * ratio;
+
+      const x = (pageWidth - pdfWidth) / 2;
+      const y = (pageHeight - pdfHeight) / 2;
+
+      if (i > 0) {
+        pdf.addPage();
+      }
+
+      pdf.addImage(imgDataUrl, "PNG", x, y, pdfWidth, pdfHeight);
+    }
+
+    const baseName = (pdfNameInput.value || "notebook-pages").trim() || "notebook-pages";
+    pdf.save(baseName + ".pdf");
+    generateStatus.textContent = "PDF generated and downloaded.";
+    generateStatus.className = "status ok";
+  }
+
+  function fileToDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = err => reject(err);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function getImageDimensions(dataUrl) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = function () {
+        resolve({ width: img.width, height: img.height });
+      };
+      img.onerror = reject;
+      img.src = dataUrl;
+    });
+  }
+
+  generatePdfBtn.addEventListener("click", () => {
+    createPdfFromImages().catch(err => {
+      console.error(err);
+      generateStatus.textContent = "Something went wrong while generating the PDF.";
+      generateStatus.className = "status error";
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Image Color Brush Editor – Notebook Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --surface: #ffffff;
+      --surface-soft: #f9fafb;
+      --border: #e5e7eb;
+      --border-soft: #d1d5db;
+      --text-main: #111827;
+      --text-soft: #6b7280;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      display: flex;
+      padding: 24px;
+      justify-content: center;
+    }
+
+    .app-shell {
+      max-width: 1200px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-pill {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .title-block p {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: var(--text-soft);
+    }
+
+    .meta-badge {
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background-color: var(--surface);
+      color: var(--text-soft);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .meta-badge span {
+      display: block;
+    }
+
+    a.back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    a.back-link:hover {
+      text-decoration: underline;
+    }
+
+    .main {
+      display: grid;
+      grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background-color: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border);
+      padding: 18px 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-soft);
+      margin-bottom: 4px;
+    }
+
+    .field-group {
+      margin-bottom: 4px;
+    }
+
+    .field-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .field-label span.hint {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    input[type="file"] {
+      font-family: inherit;
+      width: 100%;
+      font-size: 13px;
+      border-radius: var(--radius-md);
+      padding: 7px 9px;
+      border: 1px solid var(--border-soft);
+      background-color: var(--surface-soft);
+      color: var(--text-main);
+      outline: none;
+    }
+
+    input[type="file"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.2);
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    .status {
+      font-size: 11px;
+      margin-top: 4px;
+      color: var(--text-soft);
+    }
+
+    .status.ok {
+      color: #15803d;
+    }
+
+    .status.error {
+      color: #b91c1c;
+    }
+
+    button {
+      border-radius: 999px;
+      border: 1px solid transparent;
+      padding: 9px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.12s ease, border-color 0.12s ease, transform 0.05s ease,
+        box-shadow 0.12s ease;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+      width: 100%;
+      margin-top: 6px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: #1d4ed8;
+      border-color: #1d4ed8;
+      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background-color: #ffffff;
+      color: var(--text-main);
+      border-color: var(--border-soft);
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: var(--surface-soft);
+      border-color: var(--border);
+    }
+
+    .mode-toggle {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      justify-content: center;
+      font-size: 13px;
+    }
+
+    .mode-btn.active {
+      background-color: var(--accent-soft);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .color-preview-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-soft);
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    .color-swatch {
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: #e5e7eb;
+    }
+
+    .small-note {
+      font-size: 11px;
+      color: var(--text-soft);
+      margin-top: 4px;
+    }
+
+    /* right side: canvas */
+
+    .editor-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-soft);
+    }
+
+    .preview-header strong {
+      color: var(--text-main);
+    }
+
+    .canvas-wrapper {
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      padding: 10px;
+      max-height: 80vh;
+      overflow: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f9fafb;
+    }
+
+    #imageCanvas {
+      max-width: 100%;
+      max-height: 560px;
+      background-color: transparent;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.2);
+      cursor: crosshair;
+    }
+
+    .empty-state {
+      font-size: 13px;
+      color: var(--text-soft);
+      text-align: center;
+      padding: 20px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 16px;
+      }
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- Header -->
+  <header class="header">
+    <div class="title-block">
+      <!-- BACK BUTTON -->
+<button class="back-btn" onclick="goHome()">← Back to home</button>
+
+<style>
+  .back-btn {
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    color: #111827;
+    font-family: system-ui, sans-serif;
+    font-size: 14px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    transition: 0.15s ease;
+  }
+
+  .back-btn:hover {
+    background: #e8f0ff;
+    border-color: #2563eb;
+    color: #2563eb;
+    transform: translateY(-1px);
+  }
+</style>
+
+<script>
+  function goHome() {
+    window.location.href = "index.html"; 
+  }
+</script>
+
+      <h1>
+        Image Color Brush Editor
+        <span class="title-pill">Pick color · Doodle / Restore</span>
+      </h1>
+      <p>Upload an image, pick a color from it, then paint with that color or restore from the original using a brush.</p>
+    </div>
+    <div class="meta-badge">
+      <span>Client-side · Canvas based</span>
+      <span style="font-size:12px;">
+        <a href="index.html" class="back-link">← Back to Notebook Writer</a>
+      </span>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Left controls -->
+    <section class="card">
+      <div class="section-title">Image</div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Select image</span>
+          <span class="hint">PNG / JPG</span>
+        </div>
+        <input type="file" id="imageInput" accept="image/*" />
+        <div id="imageStatus" class="status">No image selected.</div>
+      </div>
+
+      <div class="section-title" style="margin-top:8px;">Brush mode</div>
+      <div class="mode-toggle">
+        <button class="mode-btn btn-secondary active" data-mode="doodle" id="modeDoodle">
+          🎨 Doodle (paint)
+        </button>
+        <button class="mode-btn btn-secondary" data-mode="restore" id="modeRestore">
+          🩹 Restore
+        </button>
+      </div>
+      <div class="small-note">
+        Doodle = paint with picked color. Restore = paint original pixels back (useful after erasing or drawing).
+      </div>
+
+      <div class="section-title" style="margin-top:8px;">Color picker</div>
+      <div class="small-note">
+        Click on the image (right side) to sample the color for the doodle brush.
+      </div>
+      <div class="color-preview-row">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span>Picked color:</span>
+          <div id="colorSwatch" class="color-swatch"></div>
+        </div>
+        <span id="colorInfo">None</span>
+      </div>
+
+      <div class="section-title" style="margin-top:8px;">Brush size</div>
+      <div class="field-group">
+        <div class="field-label">
+          <span>Brush radius</span>
+          <span class="hint"><span id="brushValue">15</span> px</span>
+        </div>
+        <input type="range" id="brushSlider" min="3" max="80" value="15" />
+      </div>
+
+      <button id="resetBtn" class="btn-secondary" disabled>
+        🔄 Reset to original
+      </button>
+      <button id="downloadBtn" class="btn-primary" disabled>
+        ⬇️ Download edited image (PNG)
+      </button>
+
+      <div id="actionStatus" class="status" style="margin-top:8px;"></div>
+    </section>
+
+    <!-- Right preview -->
+    <section class="card editor-card">
+      <div class="preview-header">
+        <div>
+          <strong>Preview</strong>
+          <span id="infoLabel"></span>
+        </div>
+        <span style="font-size:11px;color:var(--text-soft);">
+          Click to pick color, drag to paint.
+        </span>
+      </div>
+      <div class="canvas-wrapper">
+        <canvas id="imageCanvas"></canvas>
+        <div id="emptyState" class="empty-state">
+          Upload an image on the left. Then click on the image to pick a color (for doodle), and drag to paint.
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+  const imageInput    = document.getElementById("imageInput");
+  const imageStatus   = document.getElementById("imageStatus");
+  const infoLabel     = document.getElementById("infoLabel");
+  const actionStatus  = document.getElementById("actionStatus");
+
+  const canvas        = document.getElementById("imageCanvas");
+  const ctx           = canvas.getContext("2d");
+  const emptyState    = document.getElementById("emptyState");
+
+  const colorSwatch   = document.getElementById("colorSwatch");
+  const colorInfo     = document.getElementById("colorInfo");
+
+  const brushSlider   = document.getElementById("brushSlider");
+  const brushValue    = document.getElementById("brushValue");
+
+  const modeButtons   = document.querySelectorAll(".mode-btn");
+  const modeDoodleBtn = document.getElementById("modeDoodle");
+  const modeRestoreBtn= document.getElementById("modeRestore");
+
+  const resetBtn      = document.getElementById("resetBtn");
+  const downloadBtn   = document.getElementById("downloadBtn");
+
+  let activeMode = "doodle"; // "doodle" or "restore"
+
+  let originalImage = new Image();
+  let hasImage = false;
+
+  // offscreen original canvas for restore mode
+  const originalCanvas = document.createElement("canvas");
+  const originalCtx    = originalCanvas.getContext("2d");
+
+  let pickedColor = { r: 0, g: 0, b: 0 }; // default
+  let hasPickedColor = false;
+
+  let isPainting = false;
+  let lastX = 0;
+  let lastY = 0;
+
+  // ---- Mode toggle ----
+  function setMode(mode) {
+    activeMode = mode;
+    modeButtons.forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.mode === mode);
+    });
+    if (mode === "restore") {
+      actionStatus.textContent = "Restore mode: brush will bring back original pixels.";
+      actionStatus.className = "status";
+    } else {
+      actionStatus.textContent = "Doodle mode: brush paints with picked color. Click on image to pick color.";
+      actionStatus.className = "status";
+    }
+  }
+
+  modeButtons.forEach(btn => {
+    btn.addEventListener("click", () => setMode(btn.dataset.mode));
+  });
+
+  setMode("doodle");
+
+  // ---- Brush size ----
+  brushSlider.addEventListener("input", () => {
+    brushValue.textContent = brushSlider.value;
+  });
+
+  // ---- Image upload ----
+  imageInput.addEventListener("change", function() {
+    const file = this.files[0];
+    resetState();
+
+    if (!file) {
+      imageStatus.textContent = "No image selected.";
+      imageStatus.className = "status";
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      imageStatus.textContent = "Please select a valid image file.";
+      imageStatus.className = "status error";
+      this.value = "";
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    originalImage = new Image();
+    originalImage.onload = function() {
+      hasImage = true;
+      const w = originalImage.naturalWidth;
+      const h = originalImage.naturalHeight;
+
+      // main canvas
+      canvas.width = w;
+      canvas.height = h;
+      ctx.clearRect(0, 0, w, h);
+      ctx.drawImage(originalImage, 0, 0, w, h);
+
+      // original (offscreen) canvas
+      originalCanvas.width = w;
+      originalCanvas.height = h;
+      originalCtx.clearRect(0, 0, w, h);
+      originalCtx.drawImage(originalImage, 0, 0, w, h);
+
+      emptyState.style.display = "none";
+
+      imageStatus.textContent = `Loaded: ${file.name} (${w}×${h}px)`;
+      imageStatus.className = "status ok";
+      infoLabel.textContent = `${w}×${h}px`;
+
+      resetBtn.disabled = false;
+      downloadBtn.disabled = false;
+    };
+    originalImage.onerror = function() {
+      imageStatus.textContent = "Could not load image.";
+      imageStatus.className = "status error";
+      hasImage = false;
+      URL.revokeObjectURL(url);
+    };
+    originalImage.src = url;
+  });
+
+  function resetState() {
+    hasImage = false;
+    hasPickedColor = false;
+    canvas.width = 0;
+    canvas.height = 0;
+    originalCanvas.width = 0;
+    originalCanvas.height = 0;
+    emptyState.style.display = "block";
+
+    colorSwatch.style.background = "#e5e7eb";
+    colorInfo.textContent = "None";
+    resetBtn.disabled = true;
+    downloadBtn.disabled = true;
+
+    actionStatus.textContent = "";
+    imageStatus.textContent = "No image selected.";
+    imageStatus.className = "status";
+    infoLabel.textContent = "";
+  }
+
+  // ---- Utilities ----
+  function getCanvasCoords(evt) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: (evt.clientX - rect.left) * (canvas.width / rect.width),
+      y: (evt.clientY - rect.top)  * (canvas.height / rect.height)
+    };
+  }
+
+  // Click to pick color (only really needed for doodle)
+  canvas.addEventListener("click", (e) => {
+    if (!hasImage || !canvas.width) return;
+
+    const pos = getCanvasCoords(e);
+    const x = Math.floor(pos.x);
+    const y = Math.floor(pos.y);
+    if (x < 0 || y < 0 || x >= canvas.width || y >= canvas.height) return;
+
+    const pixel = ctx.getImageData(x, y, 1, 1).data;
+    pickedColor = { r: pixel[0], g: pixel[1], b: pixel[2] };
+    hasPickedColor = true;
+
+    colorSwatch.style.background = `rgb(${pickedColor.r}, ${pickedColor.g}, ${pickedColor.b})`;
+    colorInfo.textContent = `rgb(${pickedColor.r}, ${pickedColor.g}, ${pickedColor.b})`;
+
+    if (activeMode === "doodle") {
+      actionStatus.textContent = "Color picked. Drag on image to doodle with this color.";
+      actionStatus.className = "status ok";
+    }
+  });
+
+  // ---- Painting ----
+
+  canvas.addEventListener("mousedown", (e) => {
+    if (!hasImage || !canvas.width) return;
+
+    isPainting = true;
+    const pos = getCanvasCoords(e);
+    lastX = pos.x;
+    lastY = pos.y;
+
+    // draw a dot to start
+    applyBrush(pos.x, pos.y, lastX, lastY, true);
+  });
+
+  canvas.addEventListener("mousemove", (e) => {
+    if (!isPainting || !hasImage) return;
+    const pos = getCanvasCoords(e);
+    applyBrush(pos.x, pos.y, lastX, lastY, false);
+    lastX = pos.x;
+    lastY = pos.y;
+  });
+
+  canvas.addEventListener("mouseup", () => {
+    isPainting = false;
+  });
+
+  canvas.addEventListener("mouseleave", () => {
+    isPainting = false;
+  });
+
+  function applyBrush(x, y, fromX, fromY, isDot) {
+    const radius = Number(brushSlider.value);
+
+    if (activeMode === "doodle") {
+      if (!hasPickedColor) {
+        actionStatus.textContent = "Pick a color first (click on the image).";
+        actionStatus.className = "status error";
+        return;
+      }
+      ctx.save();
+      ctx.strokeStyle = `rgb(${pickedColor.r}, ${pickedColor.g}, ${pickedColor.b})`;
+      ctx.fillStyle   = `rgb(${pickedColor.r}, ${pickedColor.g}, ${pickedColor.b})`;
+      ctx.lineWidth = radius * 2;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      if (isDot) {
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    } else if (activeMode === "restore") {
+      // copy from original canvas in brush area
+      const brushX = x - radius;
+      const brushY = y - radius;
+      const size = radius * 2;
+
+      // create a clipping circle path so copy is round-ish
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.clip();
+
+      ctx.drawImage(
+        originalCanvas,
+        brushX, brushY, size, size,
+        brushX, brushY, size, size
+      );
+
+      ctx.restore();
+    }
+  }
+
+  // ---- Reset & download ----
+
+  resetBtn.addEventListener("click", () => {
+    if (!hasImage || !originalCanvas.width) return;
+    canvas.width = originalCanvas.width;
+    canvas.height = originalCanvas.height;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(originalCanvas, 0, 0);
+    actionStatus.textContent = "Image reset to original.";
+    actionStatus.className = "status";
+  });
+
+  downloadBtn.addEventListener("click", () => {
+    if (!hasImage) {
+      actionStatus.textContent = "Upload an image first.";
+      actionStatus.className = "status error";
+      return;
+    }
+    const dataUrl = canvas.toDataURL("image/png");
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = "edited-image.png";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    actionStatus.textContent = "Edited image downloaded as edited-image.png";
+    actionStatus.className = "status ok";
+  });
+</script>
+
+</body>
+</html>

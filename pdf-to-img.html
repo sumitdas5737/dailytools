@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PDF to JPG – Notebook Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --surface: #ffffff;
+      --surface-soft: #f9fafb;
+      --border: #e5e7eb;
+      --border-soft: #d1d5db;
+      --text-main: #111827;
+      --text-soft: #6b7280;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      display: flex;
+      padding: 24px;
+      justify-content: center;
+    }
+
+    .app-shell {
+      max-width: 1100px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-pill {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .title-block p {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: var(--text-soft);
+    }
+
+    .meta-badge {
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background-color: var(--surface);
+      color: var(--text-soft);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    a.back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    a.back-link:hover {
+      text-decoration: underline;
+    }
+
+    .main {
+      display: grid;
+      grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .card {
+      background-color: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border);
+      padding: 18px 18px 20px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-soft);
+      margin-bottom: 12px;
+    }
+
+    .field-group {
+      margin-bottom: 12px;
+    }
+
+    .field-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .field-label span.hint {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    input[type="file"],
+    input[type="number"] {
+      width: 100%;
+      font-size: 13px;
+      border-radius: var(--radius-md);
+      padding: 6px 9px;
+      border: 1px solid var(--border-soft);
+      background-color: var(--surface-soft);
+      color: var(--text-main);
+      outline: none;
+    }
+
+    input[type="file"]:focus,
+    input[type="number"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.2);
+    }
+
+    .status {
+      font-size: 11px;
+      margin-top: 4px;
+      color: var(--text-soft);
+    }
+
+    .status.ok {
+      color: #15803d;
+    }
+
+    .status.error {
+      color: #b91c1c;
+    }
+
+    button {
+      border-radius: 999px;
+      border: 1px solid transparent;
+      padding: 9px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.12s ease, border-color 0.12s ease, transform 0.05s ease,
+        box-shadow 0.12s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .btn-primary:hover {
+      background-color: #1d4ed8;
+      border-color: #1d4ed8;
+      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background-color: #ffffff;
+      color: var(--text-main);
+      border-color: var(--border-soft);
+      width: 100%;
+      margin-top: 6px;
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--surface-soft);
+      border-color: var(--border);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .preview-header h2 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+      max-height: 520px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .preview-item {
+      border-radius: 10px;
+      border: 1px solid var(--border-soft);
+      background-color: var(--surface-soft);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      font-size: 11px;
+    }
+
+    .preview-item img {
+      width: 100%;
+      height: 150px;
+      object-fit: contain;
+      background-color: #f3f4f6;
+    }
+
+    .preview-meta {
+      padding: 6px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .preview-meta span {
+      color: var(--text-soft);
+      font-size: 11px;
+    }
+
+    .download-link {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background-color: #ffffff;
+      color: var(--accent);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .download-link:hover {
+      background-color: var(--accent-soft);
+      border-color: var(--accent);
+    }
+
+    .empty-state {
+      font-size: 13px;
+      color: var(--text-soft);
+      padding: 20px;
+      text-align: center;
+      border-radius: 12px;
+      border: 1px dashed var(--border-soft);
+      background-color: var(--surface-soft);
+    }
+
+    @media (max-width: 900px) {
+      .main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 16px;
+      }
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- Header -->
+  <header class="header">
+    <div class="title-block">
+      <!-- BACK BUTTON -->
+<button class="back-btn" onclick="goHome()">← Back to home</button>
+
+<style>
+  .back-btn {
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    color: #111827;
+    font-family: system-ui, sans-serif;
+    font-size: 14px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    transition: 0.15s ease;
+  }
+
+  .back-btn:hover {
+    background: #e8f0ff;
+    border-color: #2563eb;
+    color: #2563eb;
+    transform: translateY(-1px);
+  }
+</style>
+
+<script>
+  function goHome() {
+    window.location.href = "index.html"; 
+  }
+</script>
+
+      <h1>
+        PDF to JPG
+        <span class="title-pill">Export pages</span>
+      </h1>
+      <p>Upload a PDF of your notes and export each page as a separate JPG image.</p>
+    </div>
+    <div>
+      <div class="meta-badge">
+        <span>Renders locally</span>
+        <span>•</span>
+        <span>Per-page JPG download</span>
+      </div>
+      <div style="text-align:right;margin-top:4px;">
+        <a href="index.html" class="back-link">← Back to Notebook Writer</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Left: controls -->
+    <section class="card">
+      <div class="section-title">PDF input</div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Select PDF file</span>
+          <span class="hint">Single PDF</span>
+        </div>
+        <input type="file" id="pdfInput" accept="application/pdf" />
+        <div id="pdfStatus" class="status">No PDF selected.</div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Render quality (scale)</span>
+          <span class="hint">Higher = sharper & slower</span>
+        </div>
+        <input type="number" id="scaleInput" min="1" max="4" step="0.5" value="2" />
+      </div>
+
+      <button id="convertBtn" class="btn-primary">
+        🔄 Convert pages to JPG
+      </button>
+      <button id="clearBtn" class="btn-secondary">
+        🧹 Clear results
+      </button>
+
+      <div id="convertStatus" class="status" style="margin-top:8px;"></div>
+    </section>
+
+    <!-- Right: preview -->
+    <section class="card">
+      <div class="preview-header">
+        <h2>Page previews</h2>
+        <span id="countLabel" style="font-size:12px;color:var(--text-soft);">0 pages</span>
+      </div>
+      <div id="previewContainer" class="preview-grid"></div>
+      <div id="emptyState" class="empty-state">
+        No pages yet. Select a PDF on the left and click “Convert pages to JPG”.  
+        Each page will appear here with its own download button.
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  // Configure worker for pdf.js
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+</script>
+
+<script>
+  const pdfInput        = document.getElementById("pdfInput");
+  const pdfStatus       = document.getElementById("pdfStatus");
+  const convertBtn      = document.getElementById("convertBtn");
+  const clearBtn        = document.getElementById("clearBtn");
+  const convertStatus   = document.getElementById("convertStatus");
+  const previewContainer= document.getElementById("previewContainer");
+  const emptyState      = document.getElementById("emptyState");
+  const countLabel      = document.getElementById("countLabel");
+  const scaleInput      = document.getElementById("scaleInput");
+
+  let currentPdfFile = null;
+  let pageImages = []; // { pageNumber, dataUrl }
+
+  pdfInput.addEventListener("change", function () {
+    const file = this.files[0];
+    pageImages = [];
+    clearPreview();
+
+    if (!file) {
+      pdfStatus.textContent = "No PDF selected.";
+      pdfStatus.className = "status";
+      return;
+    }
+
+    if (file.type !== "application/pdf") {
+      pdfStatus.textContent = "Please select a valid PDF file.";
+      pdfStatus.className = "status error";
+      this.value = "";
+      return;
+    }
+
+    currentPdfFile = file;
+    pdfStatus.textContent = "Selected: " + file.name;
+    pdfStatus.className = "status ok";
+    convertStatus.textContent = "";
+  });
+
+  clearBtn.addEventListener("click", () => {
+    currentPdfFile = null;
+    pdfInput.value = "";
+    pageImages = [];
+    pdfStatus.textContent = "No PDF selected.";
+    pdfStatus.className = "status";
+    convertStatus.textContent = "";
+    clearPreview();
+  });
+
+  function clearPreview() {
+    previewContainer.innerHTML = "";
+    countLabel.textContent = "0 pages";
+    emptyState.style.display = "block";
+  }
+
+  convertBtn.addEventListener("click", async () => {
+    if (!currentPdfFile) {
+      convertStatus.textContent = "Please select a PDF file first.";
+      convertStatus.className = "status error";
+      return;
+    }
+
+    const scaleValue = parseFloat(scaleInput.value) || 2;
+    convertStatus.textContent = "Rendering pages, please wait...";
+    convertStatus.className = "status";
+
+    pageImages = [];
+    previewContainer.innerHTML = "";
+    emptyState.style.display = "none";
+    countLabel.textContent = "0 pages";
+
+    try {
+      const arrayBuffer = await fileToArrayBuffer(currentPdfFile);
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        convertStatus.textContent = `Rendering page ${pageNum} of ${pdf.numPages}...`;
+        const page = await pdf.getPage(pageNum);
+        const viewport = page.getViewport({ scale: scaleValue });
+
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        await page.render({ canvasContext: ctx, viewport }).promise;
+
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
+        pageImages.push({ pageNumber: pageNum, dataUrl });
+        addPreviewItem(pageNum, dataUrl);
+        countLabel.textContent = pageImages.length + " page(s)";
+      }
+
+      convertStatus.textContent = "All pages rendered. You can download each as JPG.";
+      convertStatus.className = "status ok";
+    } catch (err) {
+      console.error(err);
+      convertStatus.textContent = "Error while converting PDF. Please try another file.";
+      convertStatus.className = "status error";
+      clearPreview();
+    }
+  });
+
+  function addPreviewItem(pageNumber, dataUrl) {
+    const item = document.createElement("div");
+    item.className = "preview-item";
+
+    const img = document.createElement("img");
+    img.src = dataUrl;
+    img.alt = "Page " + pageNumber;
+
+    const meta = document.createElement("div");
+    meta.className = "preview-meta";
+
+    const label = document.createElement("span");
+    label.textContent = "Page " + pageNumber;
+
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = `page-${pageNumber}.jpg`;
+    link.textContent = "Download JPG";
+    link.className = "download-link";
+
+    meta.appendChild(label);
+    meta.appendChild(link);
+    item.appendChild(img);
+    item.appendChild(meta);
+    previewContainer.appendChild(item);
+  }
+
+  function fileToArrayBuffer(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = err => reject(err);
+      reader.readAsArrayBuffer(file);
+    });
+  }
+</script>
+
+</body>
+</html>

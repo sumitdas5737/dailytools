@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Notebook Writer – Custom Font & Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- UI font (not used for your notebook text) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --surface: #ffffff;
+      --surface-soft: #f9fafb;
+      --border: #e5e7eb;
+      --border-soft: #d1d5db;
+      --text-main: #111827;
+      --text-soft: #6b7280;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      display: flex;
+      padding: 24px;
+      justify-content: center;
+    }
+
+    .app-shell {
+      max-width: 1200px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Header */
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .title-block h1 {
+      font-size: 22px;
+      font-weight: 600;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-pill {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .title-block p {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: var(--text-soft);
+    }
+
+    .meta-badge {
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background-color: var(--surface);
+      color: var(--text-soft);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    /* Main layout */
+
+    .main {
+      display: grid;
+      grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .card {
+      background-color: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border);
+      padding: 18px 18px 20px;
+    }
+
+    /* Controls panel */
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-soft);
+      margin-bottom: 12px;
+    }
+
+    .field-group {
+      margin-bottom: 12px;
+    }
+
+    .field-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .field-label span.hint {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    input[type="file"],
+    textarea {
+      width: 100%;
+      font-size: 13px;
+      border-radius: var(--radius-md);
+      padding: 8px 9px;
+      border: 1px solid var(--border-soft);
+      background-color: var(--surface-soft);
+      color: var(--text-main);
+      outline: none;
+    }
+
+    input[type="file"] {
+      padding: 5px 9px;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      font-size: 14px;
+    }
+
+    textarea::placeholder {
+      color: #9ca3af;
+    }
+
+    input[type="file"]:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.2);
+    }
+
+    .status {
+      font-size: 11px;
+      margin-top: 3px;
+      color: var(--text-soft);
+    }
+
+    .status.ok {
+      color: #15803d;
+    }
+
+    .status.error {
+      color: #b91c1c;
+    }
+
+    .button-row {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    button {
+      border-radius: 999px;
+      border: 1px solid transparent;
+      padding: 9px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.12s ease, border-color 0.12s ease, transform 0.05s ease,
+        box-shadow 0.12s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+
+    .btn-primary:hover {
+      background-color: #1d4ed8;
+      border-color: #1d4ed8;
+      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background-color: #ffffff;
+      color: var(--text-main);
+      border-color: var(--border-soft);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--surface-soft);
+      border-color: var(--border);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    /* Sliders */
+
+    .slider-group {
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px;
+      border-radius: 10px;
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+    }
+
+    .slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .slider-row label {
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-soft);
+    }
+
+    .slider-row label span.value {
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    /* Notebook page */
+
+    .page-wrapper {
+      position: relative;
+    }
+
+    .page {
+      border-radius: var(--radius-lg);
+      background-color: #f9fafb;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      height: 720px;
+      display: flex;
+    }
+
+    .page-inner {
+      flex: 1;
+      padding: 40px 40px;
+      overflow-y: auto;
+
+      /* 👉 YOUR DEFAULT NOTEBOOK IMAGE HERE */
+      background-image: url("notebook.png"); /* rename if your file has a different name */
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .page-frame {
+      position: relative;
+      min-height: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(209, 213, 219, 0.0); /* invisible, layout only */
+      background-color: transparent;
+      padding: 20px 24px 24px;
+      box-sizing: border-box;
+    }
+
+    /* turned off red margin line */
+    .page-frame::before {
+      content: "";
+      position: absolute;
+      top: 14px;
+      bottom: 14px;
+      left: 48px;
+      width: 0px;
+    }
+
+    #output {
+      margin-top: 8px;
+      /* adjust based on your notebook image left margin */
+      padding-left: 20px;
+      font-size: 22px;
+      line-height: 30px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      color: var(--text-main);
+      letter-spacing: 0px;
+      word-spacing: 0px;
+    }
+
+    #output.placeholder {
+      font-style: italic;
+      color: #4b5563;
+    }
+
+    /* Responsive */
+
+    @media (max-width: 960px) {
+      .main {
+        grid-template-columns: 1fr;
+      }
+      .page {
+        height: 640px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 16px;
+      }
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .page-inner {
+        padding: 28px 22px;
+      }
+      #output {
+        padding-left: 14px;
+        font-size: 20px;
+        line-height: 28px;
+      }
+    }
+  </style>
+
+  <!-- dynamic font rule -->
+  <style id="dynamicFontCSS"></style>
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- Header -->
+  <header class="header">
+    <div class="title-block">
+      <!-- BACK BUTTON -->
+<button class="back-btn" onclick="goHome()">← Back to home</button>
+
+<style>
+  .back-btn {
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    color: #111827;
+    font-family: system-ui, sans-serif;
+    font-size: 14px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    transition: 0.15s ease;
+  }
+
+  .back-btn:hover {
+    background: #e8f0ff;
+    border-color: #2563eb;
+    color: #2563eb;
+    transform: translateY(-1px);
+  }
+</style>
+
+<script>
+  function goHome() {
+    window.location.href = "index.html"; 
+  }
+</script>
+
+      <h1>
+        Notebook Writer
+        <span class="title-pill">Custom handwriting</span>
+      </h1>
+      <p>Upload your own font, use your notebook image, and tweak spacing so it looks exactly like real writing.</p>
+    </div>
+    <div class="meta-badge">
+      <span class="dot"></span>
+      <span>Client-side</span>
+      <span>•</span>
+      <span>PNG export</span>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main class="main">
+    <!-- Controls -->
+    <section class="card">
+      <div class="section-title">Setup</div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Custom font file</span>
+          <span class="hint">.ttf or .otf</span>
+        </div>
+        <input type="file" id="fontUpload" accept=".ttf,.otf" />
+        <div id="fontStatus" class="status">No font loaded.</div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Page background (optional override)</span>
+          <span class="hint">JPG / PNG</span>
+        </div>
+        <input type="file" id="bgUpload" accept="image/*" />
+        <div id="bgStatus" class="status">Using your default image (notebook.png).</div>
+      </div>
+
+      <div class="section-title" style="margin-top: 14px;">Write</div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Text to add</span>
+          <span class="hint">Each click appends to page</span>
+        </div>
+        <textarea id="textInput" placeholder="Type the content you want on this page..."></textarea>
+      </div>
+
+      <!-- Text adjustments -->
+      <div class="section-title" style="margin-top: 10px;">Text style</div>
+      <div class="slider-group">
+        <div class="slider-row">
+          <label>
+            <span>Font size</span>
+            <span class="value" id="fontSizeValue">22 px</span>
+          </label>
+          <input type="range" id="fontSizeSlider" min="16" max="36" value="22" />
+        </div>
+
+        <div class="slider-row">
+          <label>
+            <span>Line spacing</span>
+            <span class="value" id="lineHeightValue">30 px</span>
+          </label>
+          <input type="range" id="lineHeightSlider" min="22" max="46" value="30" />
+        </div>
+
+        <div class="slider-row">
+          <label>
+            <span>Letter spacing</span>
+            <span class="value" id="letterSpacingValue">0 px</span>
+          </label>
+          <input type="range" id="letterSpacingSlider" min="-2" max="6" value="0" step="0.5" />
+        </div>
+
+        <div class="slider-row">
+          <label>
+            <span>Word spacing</span>
+            <span class="value" id="wordSpacingValue">0 px</span>
+          </label>
+          <input type="range" id="wordSpacingSlider" min="0" max="16" value="0" />
+        </div>
+      </div>
+
+      <div class="button-row">
+        <button id="addText" class="btn-primary">
+          ➕ Add to page
+        </button>
+        <button id="downloadBtn" class="btn-secondary">
+          ⬇️ Download page as PNG
+        </button>
+      </div>
+    </section>
+
+    <!-- Notebook page preview -->
+    <section class="card page-wrapper">
+      <div class="page" id="page">
+        <div class="page-inner" id="pageInner">
+          <div class="page-frame">
+            <div id="output" class="placeholder">
+Start typing, upload your font, and add text. It will appear here on top of your notebook image.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- html2canvas for export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+  let fontLoaded = false;
+
+  const fontUpload    = document.getElementById("fontUpload");
+  const bgUpload      = document.getElementById("bgUpload");
+  const fontStatus    = document.getElementById("fontStatus");
+  const bgStatus      = document.getElementById("bgStatus");
+  const dynamicFont   = document.getElementById("dynamicFontCSS");
+  const output        = document.getElementById("output");
+  const textInput     = document.getElementById("textInput");
+  const addTextBtn    = document.getElementById("addText");
+  const downloadBtn   = document.getElementById("downloadBtn");
+  const page          = document.getElementById("page");
+  const pageInner     = document.getElementById("pageInner");
+
+  // sliders
+  const fontSizeSlider      = document.getElementById("fontSizeSlider");
+  const lineHeightSlider    = document.getElementById("lineHeightSlider");
+  const letterSpacingSlider = document.getElementById("letterSpacingSlider");
+  const wordSpacingSlider   = document.getElementById("wordSpacingSlider");
+
+  const fontSizeValue      = document.getElementById("fontSizeValue");
+  const lineHeightValue    = document.getElementById("lineHeightValue");
+  const letterSpacingValue = document.getElementById("letterSpacingValue");
+  const wordSpacingValue   = document.getElementById("wordSpacingValue");
+
+  // Apply text styles from sliders
+  function applyTextStyles() {
+    const fs  = fontSizeSlider.value;
+    const lh  = lineHeightSlider.value;
+    const ls  = letterSpacingSlider.value;
+    const ws  = wordSpacingSlider.value;
+
+    output.style.fontSize      = fs + "px";
+    output.style.lineHeight    = lh + "px";
+    output.style.letterSpacing = ls + "px";
+    output.style.wordSpacing   = ws + "px";
+
+    fontSizeValue.textContent      = fs + " px";
+    lineHeightValue.textContent    = lh + " px";
+    letterSpacingValue.textContent = ls + " px";
+    wordSpacingValue.textContent   = ws + " px";
+  }
+  applyTextStyles();
+
+  fontSizeSlider.addEventListener("input", applyTextStyles);
+  lineHeightSlider.addEventListener("input", applyTextStyles);
+  letterSpacingSlider.addEventListener("input", applyTextStyles);
+  wordSpacingSlider.addEventListener("input", applyTextStyles);
+
+  // Font upload
+  fontUpload.addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const ext = file.name.split(".").pop().toLowerCase();
+    if (ext !== "ttf" && ext !== "otf") {
+      fontStatus.textContent = "Please upload a .ttf or .otf file.";
+      fontStatus.className = "status error";
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    const fontName = "UploadedFont_" + Date.now();
+
+    dynamicFont.textContent = `
+      @font-face {
+        font-family: '${fontName}';
+        src: url('${url}');
+      }
+      .useUploadedFont {
+        font-family: '${fontName}';
+      }
+    `;
+
+    output.classList.add("useUploadedFont");
+    fontLoaded = true;
+    fontStatus.textContent = "Font loaded: " + file.name;
+    fontStatus.className = "status ok";
+
+    if (output.classList.contains("placeholder")) {
+      output.textContent = "";
+      output.classList.remove("placeholder");
+    }
+  });
+
+  // Background upload (override default image)
+  bgUpload.addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const url = URL.createObjectURL(file);
+    pageInner.style.backgroundImage = `url('${url}')`;
+    bgStatus.textContent = "Background overridden with uploaded image.";
+    bgStatus.className = "status ok";
+  });
+
+  // Add text to page
+  addTextBtn.addEventListener("click", function () {
+    const text = textInput.value;
+    if (!text.trim()) return;
+
+    if (!fontLoaded) {
+      fontStatus.textContent = "Upload your font first so text matches your style.";
+      fontStatus.className = "status error";
+      return;
+    }
+
+    if (output.classList.contains("placeholder")) {
+      output.textContent = "";
+      output.classList.remove("placeholder");
+    }
+
+    output.textContent += (output.textContent ? "\n\n" : "") + text;
+    textInput.value = "";
+    textInput.focus();
+  });
+
+  // Download as PNG
+  downloadBtn.addEventListener("click", async function () {
+    const previousOverflow = page.style.overflow;
+    page.style.overflow = "hidden";
+
+    const canvas = await html2canvas(page, {
+      scale: 2,
+      useCORS: true
+    });
+
+    page.style.overflow = previousOverflow || "hidden";
+
+    const dataURL = canvas.toDataURL("image/png");
+    const link = document.createElement("a");
+    link.href = dataURL;
+    link.download = "notebook-page.png";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
+</script>
+
+</body>
+</html>

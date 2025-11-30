@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Image Cropper – Notebook Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --surface: #ffffff;
+      --surface-soft: #f9fafb;
+      --border: #e5e7eb;
+      --border-soft: #d1d5db;
+      --text-main: #111827;
+      --text-soft: #6b7280;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      display: flex;
+      padding: 24px;
+      justify-content: center;
+    }
+
+    .app-shell {
+      max-width: 1200px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-pill {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .title-block p {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: var(--text-soft);
+    }
+
+    .meta-badge {
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background-color: var(--surface);
+      color: var(--text-soft);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .meta-badge span {
+      display: block;
+    }
+
+    a.back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    a.back-link:hover {
+      text-decoration: underline;
+    }
+
+    .main {
+      display: grid;
+      grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .card {
+      background-color: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border);
+      padding: 18px 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-soft);
+      margin-bottom: 4px;
+    }
+
+    .field-group {
+      margin-bottom: 6px;
+    }
+
+    .field-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .field-label span.hint {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    input[type="file"] {
+      font-family: inherit;
+      width: 100%;
+      font-size: 13px;
+      border-radius: var(--radius-md);
+      padding: 7px 9px;
+      border: 1px solid var(--border-soft);
+      background-color: var(--surface-soft);
+      color: var(--text-main);
+      outline: none;
+    }
+
+    input[type="file"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.2);
+    }
+
+    .status {
+      font-size: 11px;
+      margin-top: 4px;
+      color: var(--text-soft);
+    }
+
+    .status.ok {
+      color: #15803d;
+    }
+
+    .status.error {
+      color: #b91c1c;
+    }
+
+    button {
+      border-radius: 999px;
+      border: 1px solid transparent;
+      padding: 9px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.12s ease, border-color 0.12s ease, transform 0.05s ease,
+        box-shadow 0.12s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .btn-primary:hover {
+      background-color: #1d4ed8;
+      border-color: #1d4ed8;
+      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background-color: #ffffff;
+      color: var(--text-main);
+      border-color: var(--border-soft);
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--surface-soft);
+      border-color: var(--border);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    .info-row {
+      font-size: 11px;
+      color: var(--text-soft);
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .small-note {
+      font-size: 11px;
+      color: var(--text-soft);
+      margin-top: 4px;
+    }
+
+    .shape-toggle {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-soft);
+      flex-wrap: wrap;
+    }
+
+    .shape-toggle label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background-color: var(--surface-soft);
+      cursor: pointer;
+    }
+
+    .shape-toggle input[type="radio"] {
+      margin: 0;
+    }
+
+    /* Right: canvas + cropped preview */
+
+    .preview-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr);
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 900px) {
+      .preview-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .canvas-wrapper {
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background-color: var(--surface-soft);
+      padding: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 260px;
+      position: relative;
+    }
+
+    #imageCanvas {
+      max-width: 100%;
+      max-height: 450px;
+      border-radius: 10px;
+      background-color: #e5e7eb;
+      cursor: crosshair;
+    }
+
+    .empty-state {
+      font-size: 13px;
+      color: var(--text-soft);
+      text-align: center;
+      padding: 20px;
+    }
+
+    .cropped-wrapper {
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background-color: var(--surface-soft);
+      padding: 8px;
+      min-height: 140px;
+    }
+
+    .cropped-wrapper h3 {
+      margin: 0 0 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    #croppedPreview {
+      max-width: 100%;
+      max-height: 260px;
+      display: block;
+      margin: 0 auto;
+      border-radius: 8px;
+      background-color: #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- Header -->
+  <header class="header">
+    <div class="title-block">
+      <!-- BACK BUTTON -->
+<button class="back-btn" onclick="goHome()">← Back to home</button>
+
+<style>
+  .back-btn {
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    color: #111827;
+    font-family: system-ui, sans-serif;
+    font-size: 14px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    transition: 0.15s ease;
+  }
+
+  .back-btn:hover {
+    background: #e8f0ff;
+    border-color: #2563eb;
+    color: #2563eb;
+    transform: translateY(-1px);
+  }
+</style>
+
+<script>
+  function goHome() {
+    window.location.href = "index.html"; 
+  }
+</script>
+
+      <h1>
+        Image Cropper
+        <span class="title-pill">Rectangle & circle</span>
+      </h1>
+      <p>Upload your image, choose a shape, drag to select a region, and download the cropped result.</p>
+    </div>
+    <div class="meta-badge">
+      <span>Client-side cropping · Canvas based</span>
+      <span style="font-size:12px;">
+        <a href="index.html" class="back-link">← Back to Notebook Writer</a>
+      </span>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Left controls -->
+    <section class="card">
+      <div class="section-title">Image</div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Select image</span>
+          <span class="hint">PNG / JPG</span>
+        </div>
+        <input type="file" id="imageInput" accept="image/*" />
+        <div id="imageStatus" class="status">No image selected.</div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Crop shape</span>
+          <span class="hint">Rectangle / Circle</span>
+        </div>
+        <div class="shape-toggle">
+          <label>
+            <input type="radio" name="cropShape" value="rect" checked />
+            <span>Rectangle</span>
+          </label>
+          <label>
+            <input type="radio" name="cropShape" value="circle" />
+            <span>Circle</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="info-row">
+        <span id="infoImageSize">Image: -</span>
+        <span id="infoCropSize">Crop: -</span>
+      </div>
+
+      <div class="small-note">
+        Drag on the image (right side) to draw a crop box. Shape depends on the selected option above.
+      </div>
+
+      <button id="cropBtn" class="btn-primary">
+        ✂️ Crop & preview
+      </button>
+      <button id="downloadBtn" class="btn-secondary">
+        ⬇️ Download cropped image (PNG)
+      </button>
+
+      <div id="actionStatus" class="status" style="margin-top:8px;"></div>
+    </section>
+
+    <!-- Right: canvas & cropped preview -->
+    <section class="card">
+      <div class="preview-layout">
+        <div class="canvas-wrapper">
+          <canvas id="imageCanvas"></canvas>
+          <div id="canvasEmptyState" class="empty-state">
+            Upload an image on the left, choose a shape, then click and drag on this area to select your crop region.
+          </div>
+        </div>
+
+        <div class="cropped-wrapper">
+          <h3>Cropped Preview</h3>
+          <img id="croppedPreview" alt="Cropped preview" style="display:none;" />
+          <div id="croppedEmpty" class="small-note">
+            No crop yet. Draw a crop box and click “Crop & preview”.
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+  const imageInput      = document.getElementById("imageInput");
+  const imageStatus     = document.getElementById("imageStatus");
+  const infoImageSize   = document.getElementById("infoImageSize");
+  const infoCropSize    = document.getElementById("infoCropSize");
+  const cropBtn         = document.getElementById("cropBtn");
+  const downloadBtn     = document.getElementById("downloadBtn");
+  const actionStatus    = document.getElementById("actionStatus");
+
+  const canvas          = document.getElementById("imageCanvas");
+  const ctx             = canvas.getContext("2d");
+  const canvasEmptyState= document.getElementById("canvasEmptyState");
+
+  const croppedPreview  = document.getElementById("croppedPreview");
+  const croppedEmpty    = document.getElementById("croppedEmpty");
+
+  const cropShapeInputs = document.querySelectorAll('input[name="cropShape"]');
+
+  let cropShape = "rect"; // "rect" or "circle"
+
+  cropShapeInputs.forEach(input => {
+    input.addEventListener("change", () => {
+      cropShape = input.value;
+      // reset crop when changing shape
+      cropRect = null;
+      infoCropSize.textContent = "Crop: -";
+      drawCanvas();
+    });
+  });
+
+  let originalImage = new Image();
+  let hasImage = false;
+
+  let scaleX = 1, scaleY = 1;
+  let cropRect = null;
+  let isDragging = false;
+  let dragStartX = 0;
+  let dragStartY = 0;
+
+  let lastCroppedDataUrl = null;
+
+  // ---- Image upload ----
+  imageInput.addEventListener("change", function () {
+    const file = this.files[0];
+    resetCropState();
+
+    if (!file) {
+      imageStatus.textContent = "No image selected.";
+      imageStatus.className = "status";
+      infoImageSize.textContent = "Image: -";
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      imageStatus.textContent = "Please select a valid image file.";
+      imageStatus.className = "status error";
+      this.value = "";
+      infoImageSize.textContent = "Image: -";
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    originalImage = new Image();
+    originalImage.onload = function () {
+      hasImage = true;
+      imageStatus.textContent = "Loaded: " + file.name;
+      imageStatus.className = "status ok";
+      infoImageSize.textContent = `Image: ${originalImage.width}×${originalImage.height}px`;
+
+      const maxW = 900;
+      const maxH = 450;
+      let w = originalImage.width;
+      let h = originalImage.height;
+      const r = Math.min(maxW / w, maxH / h, 1);
+      w = Math.round(w * r);
+      h = Math.round(h * r);
+
+      canvas.width = w;
+      canvas.height = h;
+
+      scaleX = w / originalImage.width;
+      scaleY = h / originalImage.height;
+
+      canvasEmptyState.style.display = "none";
+
+      drawCanvas();
+      URL.revokeObjectURL(url);
+    };
+    originalImage.onerror = function () {
+      imageStatus.textContent = "Could not load image.";
+      imageStatus.className = "status error";
+    };
+    originalImage.src = url;
+  });
+
+  function resetCropState() {
+    hasImage = false;
+    cropRect = null;
+    isDragging = false;
+    scaleX = 1;
+    scaleY = 1;
+    lastCroppedDataUrl = null;
+    infoCropSize.textContent = "Crop: -";
+    actionStatus.textContent = "";
+    croppedPreview.style.display = "none";
+    croppedEmpty.style.display = "block";
+    canvas.width = 0;
+    canvas.height = 0;
+    canvasEmptyState.style.display = "block";
+  }
+
+  // ---- Canvas drawing (transparent crop tool) ----
+  function drawCanvas() {
+    if (!hasImage) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+
+    if (cropRect) {
+      ctx.save();
+      ctx.strokeStyle = "#2563eb";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+
+      if (cropShape === "rect") {
+        ctx.strokeRect(cropRect.x + 1, cropRect.y + 1, cropRect.w - 2, cropRect.h - 2);
+      } else if (cropShape === "circle") {
+        // draw circle that fits inside the rect
+        const cx = cropRect.x + cropRect.w / 2;
+        const cy = cropRect.y + cropRect.h / 2;
+        const radius = Math.min(cropRect.w, cropRect.h) / 2 - 2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+  }
+
+  function getMousePos(evt) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: evt.clientX - rect.left,
+      y: evt.clientY - rect.top
+    };
+  }
+
+  canvas.addEventListener("mousedown", (e) => {
+    if (!hasImage) return;
+    const pos = getMousePos(e);
+    isDragging = true;
+    dragStartX = pos.x;
+    dragStartY = pos.y;
+    cropRect = { x: dragStartX, y: dragStartY, w: 0, h: 0 };
+    drawCanvas();
+  });
+
+  canvas.addEventListener("mousemove", (e) => {
+    if (!hasImage || !isDragging) return;
+    const pos = getMousePos(e);
+
+    const x1 = Math.min(dragStartX, pos.x);
+    const y1 = Math.min(dragStartY, pos.y);
+    const x2 = Math.max(dragStartX, pos.x);
+    const y2 = Math.max(dragStartY, pos.y);
+
+    cropRect = {
+      x: Math.max(0, x1),
+      y: Math.max(0, y1),
+      w: Math.min(canvas.width, x2) - Math.max(0, x1),
+      h: Math.min(canvas.height, y2) - Math.max(0, y1)
+    };
+
+    drawCanvas();
+  });
+
+  function endDrag() {
+    if (!isDragging) return;
+    isDragging = false;
+
+    if (cropRect && (cropRect.w < 5 || cropRect.h < 5)) {
+      cropRect = null;
+      infoCropSize.textContent = "Crop: -";
+    } else if (cropRect) {
+      const origW = Math.round(cropRect.w / scaleX);
+      const origH = Math.round(cropRect.h / scaleY);
+      infoCropSize.textContent =
+        cropShape === "circle"
+          ? `Crop (circle inside): ${origW}×${origH}px`
+          : `Crop: ${origW}×${origH}px`;
+    }
+    drawCanvas();
+  }
+
+  canvas.addEventListener("mouseup", endDrag);
+  canvas.addEventListener("mouseleave", endDrag);
+
+  // ---- Crop & preview ----
+  cropBtn.addEventListener("click", () => {
+    if (!hasImage) {
+      actionStatus.textContent = "Upload an image first.";
+      actionStatus.className = "status error";
+      return;
+    }
+    if (!cropRect) {
+      actionStatus.textContent = "Draw a crop area on the image by dragging.";
+      actionStatus.className = "status error";
+      return;
+    }
+
+    const origX = Math.max(0, Math.round(cropRect.x / scaleX));
+    const origY = Math.max(0, Math.round(cropRect.y / scaleY));
+    const origW = Math.max(1, Math.round(cropRect.w / scaleX));
+    const origH = Math.max(1, Math.round(cropRect.h / scaleY));
+
+    let cropCanvas = document.createElement("canvas");
+    let cropCtx = cropCanvas.getContext("2d");
+
+    if (cropShape === "rect") {
+      // normal rectangular crop
+      cropCanvas.width = origW;
+      cropCanvas.height = origH;
+      cropCtx.drawImage(
+        originalImage,
+        origX, origY, origW, origH,
+        0, 0, origW, origH
+      );
+    } else {
+      // circular crop: use square canvas, clip to circle, transparent outside
+      const side = Math.min(origW, origH);
+      cropCanvas.width = side;
+      cropCanvas.height = side;
+
+      const srcX = origX + (origW - side) / 2;
+      const srcY = origY + (origH - side) / 2;
+
+      cropCtx.clearRect(0, 0, side, side);
+      cropCtx.save();
+      cropCtx.beginPath();
+      cropCtx.arc(side / 2, side / 2, side / 2, 0, Math.PI * 2);
+      cropCtx.closePath();
+      cropCtx.clip();
+
+      cropCtx.drawImage(
+        originalImage,
+        srcX, srcY, side, side,
+        0, 0, side, side
+      );
+      cropCtx.restore();
+    }
+
+    lastCroppedDataUrl = cropCanvas.toDataURL("image/png");
+    croppedPreview.src = lastCroppedDataUrl;
+    croppedPreview.style.display = "block";
+    croppedEmpty.style.display = "none";
+
+    infoCropSize.textContent =
+      cropShape === "circle"
+        ? `Crop (circle): ${cropCanvas.width}×${cropCanvas.height}px`
+        : `Crop: ${origW}×${origH}px`;
+
+    actionStatus.textContent = "Crop ready. Click “Download cropped image (PNG)”.";
+    actionStatus.className = "status ok";
+  });
+
+  // ---- Download cropped image ----
+  downloadBtn.addEventListener("click", () => {
+    if (!lastCroppedDataUrl) {
+      actionStatus.textContent = "Crop the image first.";
+      actionStatus.className = "status error";
+      return;
+    }
+
+    const link = document.createElement("a");
+    link.href = lastCroppedDataUrl;
+    link.download = cropShape === "circle" ? "cropped-circle.png" : "cropped-image.png";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    actionStatus.textContent = "Cropped image downloaded.";
+    actionStatus.className = "status ok";
+  });
+</script>
+
+</body>
+</html>

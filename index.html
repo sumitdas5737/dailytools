@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Notebook Tools – Home</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --border: #e2e2e5;
+      --border-strong: #d1d1d6;
+      --text-main: #111827;
+      --text-soft: #6b7280;
+      --accent: #2563eb;
+      --accent-soft: #ebf3ff;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .shell {
+      max-width: 1080px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Header */
+
+    header {
+      background-color: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
+      padding: 16px 20px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-main {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      border: 1px solid var(--border-strong);
+      background-color: #f4f4f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+      color: #111827;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 13px;
+      color: var(--text-soft);
+    }
+
+    .header-meta {
+      text-align: right;
+      font-size: 12px;
+      color: var(--text-soft);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: flex-end;
+    }
+
+    .tag {
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background-color: #f9fafb;
+      font-size: 11px;
+    }
+
+    .back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 12px;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Sections */
+
+    main {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .section {
+      background-color: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
+      padding: 16px 18px 18px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .section-sub {
+      font-size: 12px;
+      color: var(--text-soft);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 16px;
+      }
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .header-meta {
+        align-items: flex-start;
+      }
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Tool cards */
+
+    .tool {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background-color: #f9fafb;
+      padding: 10px 11px 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: border-color 0.1s ease, box-shadow 0.1s ease, background 0.1s ease, transform 0.08s ease;
+    }
+
+    .tool:hover {
+      border-color: var(--accent);
+      background-color: #ffffff;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .tool-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .tool-desc {
+      font-size: 12px;
+      color: var(--text-soft);
+    }
+
+    .tool-meta {
+      margin-top: 2px;
+      font-size: 11px;
+      color: var(--text-soft);
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .pill {
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-soft);
+    }
+
+    .pill-accent {
+      border-color: rgba(37, 99, 235, 0.5);
+      background-color: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .tool-link {
+      margin-top: 6px;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+      color: var(--accent);
+    }
+
+    .tool-link span.arrow {
+      font-size: 13px;
+    }
+
+    .tool-link:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      margin-top: 4px;
+      font-size: 11px;
+      color: var(--text-soft);
+      text-align: right;
+    }
+
+    code {
+      font-family: "JetBrains Mono", Menlo, Consolas, monospace;
+      font-size: 11px;
+      background-color: #e5e7eb;
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="shell">
+  <header>
+    <div class="header-main">
+      <div class="title-row">
+        <div class="logo-mark">SD</div>
+        <div>
+          <h1>Helpful Tools</h1>
+          <p class="subtitle">Simple tools for handwriting, PDFs and images – all in one place.</p>
+        </div>
+      </div>
+    </div>
+    <div class="header-meta">
+      <span class="tag">By Sumit Das</span>
+      <span>All processing happens in your browser.</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- Handwriting / main -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-title">Handwriting & pages</div>
+        <div class="section-sub">Generate notebook-style pages with your own font.</div>
+      </div>
+      <div class="grid">
+        <div class="tool">
+          <div class="tool-name">Notebook writer</div>
+          <div class="tool-desc">
+            Type text, upload your custom TTF font, apply notebook background and export page images.
+          </div>
+          <div class="tool-meta">
+            <span class="pill pill-accent">Handwriting</span>
+            <span>TTF font · Background image</span>
+          </div>
+          <a href="handwriting.html" class="tool-link">
+            Open notebook writer <span class="arrow">↗</span>
+          </a>
+        </div>
+
+        <div class="tool">
+          <div class="tool-name">Images → PDF</div>
+          <div class="tool-desc">
+            Combine multiple page images into a single ordered PDF. Drag to change the page order.
+          </div>
+          <div class="tool-meta">
+            <span class="pill pill-accent">Images → PDF</span>
+            <span>Reorder pages</span>
+          </div>
+          <a href="img-to-pdf.html" class="tool-link">
+            Open images → PDF <span class="arrow">↗</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- PDF tools -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-title">PDF tools</div>
+        <div class="section-sub">Convert, annotate and optimise PDFs.</div>
+      </div>
+      <div class="grid">
+        <div class="tool">
+          <div class="tool-name">PDF → JPG converter</div>
+          <div class="tool-desc">
+            Convert each page in a PDF to separate JPG images for sharing or further editing.
+          </div>
+          <div class="tool-meta">
+            <span class="pill pill-accent">PDF → JPG</span>
+            <span>Multi-page output</span>
+          </div>
+          <a href="pdf-to-img.html" class="tool-link">
+            Open PDF → JPG <span class="arrow">↗</span>
+          </a>
+        </div>
+
+        <div class="tool">
+          <div class="tool-name">PDF & image compressor</div>
+          <div class="tool-desc">
+            Compress PDFs and images with a custom quality range and see size before and after.
+          </div>
+          <div class="tool-meta">
+            <span class="pill pill-accent">Compress</span>
+            <span>Custom quality</span>
+          </div>
+          <a href="compressor.html" class="tool-link">
+            Open compressor <span class="arrow">↗</span>
+          </a>
+        </div>
+
+        <div class="tool">
+          <div class="tool-name">PDF editor</div>
+          <div class="tool-desc">
+            Add text, highlights, pen drawings and editable text overlays with undo / redo.
+          </div>
+          <div class="tool-meta">
+            <span class="pill pill-accent">Annotate</span>
+            <span>Undo · Redo</span>
+          </div>
+          <a href="pdf-editor.html" class="tool-link">
+            Open PDF editor <span class="arrow">↗</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Image tools -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-title">Image tools</div>
+        <div class="section-sub">Enhance, crop and edit notebook images.</div>
+      </div>
+      <div class="grid">
+        <div class="tool">
+          <div class="tool-name">Image enhancer</div>
+          <div class="tool-desc">
+            Adjust brightness, contrast, saturation and sharpness at full resolution with zoom preview.
+          </div>
+          <div class="tool-meta">
+            <span class="pill pill-accent">Enhance</span>
+            <span>PNG export</span>
+          </div>
+          <a href="img-enhancer.html" class="tool-link">
+            Open image enhancer <span class="arrow">↗</span>
+          </a>
+        </div>
+
+        <div class="tool">
+          <div class="tool-name">Image cropper</div>
+          <div class="tool-desc">
+            Crop images using a transparent selection (rectangle or circle) and download the result.
+          </div>
+          <div class="tool-meta">
+            <span class="pill pill-accent">Crop</span>
+            <span>Rect / circle</span>
+          </div>
+          <a href="img-cropper.html" class="tool-link">
+            Open cropper <span class="arrow">↗</span>
+          </a>
+        </div>
+
+        <div class="tool">
+          <div class="tool-name">Image editor</div>
+          <div class="tool-desc">
+            Pick a color from the image and use it as a brush to doodle or restore original pixels.
+          </div>
+          <div class="tool-meta">
+            <span class="pill pill-accent">Color brush</span>
+            <span>Doodle / restore</span>
+          </div>
+          <a href="img-editor.html" class="tool-link">
+            Open color brush editor <span class="arrow">↗</span>
+          </a>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    All tools in one place.
+  </footer>
+</div>
+
+</body>
+</html>

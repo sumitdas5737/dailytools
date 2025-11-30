@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PDF & Image Compressor – Notebook Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --surface: #ffffff;
+      --surface-soft: #f9fafb;
+      --border: #e5e7eb;
+      --border-soft: #d1d5db;
+      --text-main: #111827;
+      --text-soft: #6b7280;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      display: flex;
+      padding: 24px;
+      justify-content: center;
+    }
+
+    .app-shell {
+      max-width: 1200px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-pill {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .title-block p {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: var(--text-soft);
+    }
+
+    .meta-badge {
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background-color: var(--surface);
+      color: var(--text-soft);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .meta-badge span {
+      display: block;
+    }
+
+    a.back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    a.back-link:hover {
+      text-decoration: underline;
+    }
+
+    .main {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) minmax(260px, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .card {
+      background-color: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border);
+      padding: 18px 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-soft);
+      margin-bottom: 4px;
+    }
+
+    .field-group {
+      margin-bottom: 6px;
+    }
+
+    .field-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .field-label span.hint {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    input[type="file"],
+    input[type="text"],
+    input[type="number"] {
+      font-family: inherit;
+      width: 100%;
+      font-size: 13px;
+      border-radius: var(--radius-md);
+      padding: 7px 9px;
+      border: 1px solid var(--border-soft);
+      background-color: var(--surface-soft);
+      color: var(--text-main);
+      outline: none;
+    }
+
+    input[type="file"]:focus,
+    input[type="number"]:focus,
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.2);
+    }
+
+    input[type="number"] {
+      max-width: 90px;
+      text-align: right;
+    }
+
+    .status {
+      font-size: 11px;
+      margin-top: 4px;
+      color: var(--text-soft);
+    }
+
+    .status.ok {
+      color: #15803d;
+    }
+
+    .status.error {
+      color: #b91c1c;
+    }
+
+    button {
+      border-radius: 999px;
+      border: 1px solid transparent;
+      padding: 9px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.12s ease, border-color 0.12s ease, transform 0.05s ease,
+        box-shadow 0.12s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .btn-primary:hover {
+      background-color: #1d4ed8;
+      border-color: #1d4ed8;
+      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background-color: #ffffff;
+      color: var(--text-main);
+      border-color: var(--border-soft);
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--surface-soft);
+      border-color: var(--border);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    .slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 6px;
+    }
+
+    .slider-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-soft);
+    }
+
+    .slider-top span.value {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .slider-inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    input[type="range"] {
+      flex: 1;
+    }
+
+    .small-note {
+      font-size: 11px;
+      color: var(--text-soft);
+      margin-top: 2px;
+    }
+
+    .info-row {
+      font-size: 11px;
+      color: var(--text-soft);
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+
+    /* Image preview */
+
+    .img-preview-wrapper {
+      margin-top: 8px;
+      border-radius: 10px;
+      border: 1px dashed var(--border-soft);
+      background-color: var(--surface-soft);
+      padding: 8px;
+    }
+
+    .img-preview-wrapper img {
+      max-width: 100%;
+      max-height: 260px;
+      display: block;
+      margin: 0 auto;
+      border-radius: 8px;
+      background-color: #e5e7eb;
+    }
+
+    @media (max-width: 960px) {
+      .main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 16px;
+      }
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- Header -->
+  <header class="header">
+    <div class="title-block">
+        <!-- BACK BUTTON -->
+<button class="back-btn" onclick="goHome()">← Back to home</button>
+
+<style>
+  .back-btn {
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    color: #111827;
+    font-family: system-ui, sans-serif;
+    font-size: 14px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    transition: 0.15s ease;
+  }
+
+  .back-btn:hover {
+    background: #e8f0ff;
+    border-color: #2563eb;
+    color: #2563eb;
+    transform: translateY(-1px);
+  }
+</style>
+
+<script>
+  function goHome() {
+    window.location.href = "index.html"; 
+  }
+</script>
+
+      <h1>
+        PDF & Image Compressor
+        <span class="title-pill">Lightweight files</span>
+      </h1>
+      <p>Compress PDFs and images directly in your browser, see sizes before downloading.</p>
+    </div>
+    <div class="meta-badge">
+      <span>Fully client-side · No upload to server</span>
+      <span style="font-size:12px;">
+        <a href="index.html" class="back-link">← Back to Notebook Writer</a>
+      </span>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- PDF COMPRESSOR -->
+    <section class="card">
+      <div class="section-title">PDF Compressor</div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Select PDF</span>
+          <span class="hint">Single file</span>
+        </div>
+        <input type="file" id="pdfInput" accept="application/pdf" />
+        <div id="pdfStatus" class="status">No PDF selected.</div>
+      </div>
+
+      <div class="info-row">
+        <span id="pdfInfoOriginal">Original size: -</span>
+        <span id="pdfInfoCompressed">Compressed size: -</span>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Quality & scale</span>
+          <span class="hint">Custom range</span>
+        </div>
+
+        <!-- PDF QUALITY -->
+        <div class="slider-row">
+          <div class="slider-top">
+            <span>JPEG quality for pages</span>
+            <span class="value" id="pdfQualityValue">70%</span>
+          </div>
+          <div class="slider-inline">
+            <input type="range" id="pdfQualitySlider" min="1" max="100" value="70" />
+            <input type="number" id="pdfQualityInput" min="1" max="100" value="70" />
+          </div>
+        </div>
+
+        <!-- PDF SCALE -->
+        <div class="slider-row">
+          <div class="slider-top">
+            <span>Render scale</span>
+            <span class="value" id="pdfScaleValue">1.2x</span>
+          </div>
+          <div class="slider-inline">
+            <input type="range" id="pdfScaleSlider" min="0.5" max="3" step="0.1" value="1.2" />
+            <input type="number" id="pdfScaleInput" min="0.5" max="3" step="0.1" value="1.2" />
+          </div>
+        </div>
+
+        <div class="small-note">
+          PDF is rebuilt page-by-page as JPEG images with your chosen quality & scale.
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Output filename</span>
+          <span class="hint">Without .pdf</span>
+        </div>
+        <input type="text" id="pdfName" placeholder="compressed-document" />
+      </div>
+
+      <button id="compressPdfBtn" class="btn-primary">
+        📄 Compress PDF (preview size)
+      </button>
+      <button id="downloadPdfBtn" class="btn-secondary">
+        ⬇️ Download compressed PDF
+      </button>
+      <button id="clearPdfBtn" class="btn-secondary">
+        🧹 Clear PDF selection
+      </button>
+
+      <div id="pdfResultStatus" class="status" style="margin-top:8px;"></div>
+    </section>
+
+    <!-- IMAGE COMPRESSOR -->
+    <section class="card">
+      <div class="section-title">Image Compressor</div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Select image</span>
+          <span class="hint">PNG / JPG</span>
+        </div>
+        <input type="file" id="imgInput" accept="image/*" />
+        <div id="imgStatus" class="status">No image selected.</div>
+      </div>
+
+      <div class="info-row">
+        <span id="imgInfoOriginal">Original size: -</span>
+        <span id="imgInfoCompressed">Compressed size: -</span>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>JPEG quality</span>
+          <span class="hint">Custom % (1–100)</span>
+        </div>
+
+        <!-- IMAGE QUALITY -->
+        <div class="slider-row">
+          <div class="slider-top">
+            <span>Output quality</span>
+            <span class="value" id="imgQualityValue">80%</span>
+          </div>
+          <div class="slider-inline">
+            <input type="range" id="imgQualitySlider" min="1" max="100" value="80" />
+            <input type="number" id="imgQualityInput" min="1" max="100" value="80" />
+          </div>
+        </div>
+
+        <div class="small-note">
+          Image is re-encoded as JPG using this quality. Lower = smaller file.
+        </div>
+      </div>
+
+      <div class="img-preview-wrapper" id="imgPreviewWrapper" style="display:none;">
+        <img id="imgPreview" alt="Preview" />
+      </div>
+
+      <button id="compressImgBtn" class="btn-primary">
+        🖼 Compress image (preview size)
+      </button>
+      <button id="downloadImgBtn" class="btn-secondary">
+        ⬇️ Download compressed JPG
+      </button>
+
+      <div id="imgResultStatus" class="status" style="margin-top:8px;"></div>
+
+      <!-- hidden canvas for image compression -->
+      <canvas id="imgCanvas" style="display:none;"></canvas>
+    </section>
+  </main>
+</div>
+
+<!-- jsPDF & pdf.js for PDF compression -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+</script>
+
+<script>
+  /* ========== helpers ========== */
+  function fileToArrayBuffer(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = err => reject(err);
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
+  function formatBytes(bytes) {
+    if (!bytes && bytes !== 0) return "-";
+    if (bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return (bytes / Math.pow(k, i)).toFixed(1) + " " + sizes[i];
+  }
+
+  /* ========== PDF COMPRESSOR ========== */
+
+  const pdfInput          = document.getElementById("pdfInput");
+  const pdfStatus         = document.getElementById("pdfStatus");
+  const pdfInfoOriginal   = document.getElementById("pdfInfoOriginal");
+  const pdfInfoCompressed = document.getElementById("pdfInfoCompressed");
+  const pdfResultStatus   = document.getElementById("pdfResultStatus");
+
+  const pdfQualitySlider  = document.getElementById("pdfQualitySlider");
+  const pdfQualityInput   = document.getElementById("pdfQualityInput");
+  const pdfQualityValue   = document.getElementById("pdfQualityValue");
+
+  const pdfScaleSlider    = document.getElementById("pdfScaleSlider");
+  const pdfScaleInput     = document.getElementById("pdfScaleInput");
+  const pdfScaleValue     = document.getElementById("pdfScaleValue");
+
+  const pdfNameInput      = document.getElementById("pdfName");
+  const compressPdfBtn    = document.getElementById("compressPdfBtn");
+  const downloadPdfBtn    = document.getElementById("downloadPdfBtn");
+  const clearPdfBtn       = document.getElementById("clearPdfBtn");
+
+  let currentPdfFile = null;
+  let compressedPdfBlob = null;
+
+  // sync quality
+  function syncPdfQualityFromSlider() {
+    const val = Number(pdfQualitySlider.value);
+    pdfQualityInput.value = val;
+    pdfQualityValue.textContent = val + "%";
+  }
+  function syncPdfQualityFromInput() {
+    let val = Number(pdfQualityInput.value);
+    if (isNaN(val)) val = 70;
+    if (val < 1) val = 1;
+    if (val > 100) val = 100;
+    pdfQualityInput.value = val;
+    pdfQualitySlider.value = val;
+    pdfQualityValue.textContent = val + "%";
+  }
+  pdfQualitySlider.addEventListener("input", syncPdfQualityFromSlider);
+  pdfQualityInput.addEventListener("input", syncPdfQualityFromInput);
+  syncPdfQualityFromSlider();
+
+  // sync scale
+  function syncPdfScaleFromSlider() {
+    const val = Number(pdfScaleSlider.value);
+    pdfScaleInput.value = val.toFixed(1);
+    pdfScaleValue.textContent = val.toFixed(1) + "x";
+  }
+  function syncPdfScaleFromInput() {
+    let val = Number(pdfScaleInput.value);
+    if (isNaN(val)) val = 1.2;
+    if (val < 0.5) val = 0.5;
+    if (val > 3) val = 3;
+    pdfScaleInput.value = val.toFixed(1);
+    pdfScaleSlider.value = val;
+    pdfScaleValue.textContent = val.toFixed(1) + "x";
+  }
+  pdfScaleSlider.addEventListener("input", syncPdfScaleFromSlider);
+  pdfScaleInput.addEventListener("input", syncPdfScaleFromInput);
+  syncPdfScaleFromSlider();
+
+  pdfInput.addEventListener("change", function () {
+    const file = this.files[0];
+    compressedPdfBlob = null;
+    pdfInfoCompressed.textContent = "Compressed size: -";
+
+    if (!file) {
+      pdfStatus.textContent = "No PDF selected.";
+      pdfStatus.className = "status";
+      currentPdfFile = null;
+      pdfInfoOriginal.textContent = "Original size: -";
+      return;
+    }
+
+    if (file.type !== "application/pdf") {
+      pdfStatus.textContent = "Please select a valid PDF file.";
+      pdfStatus.className = "status error";
+      this.value = "";
+      currentPdfFile = null;
+      pdfInfoOriginal.textContent = "Original size: -";
+      return;
+    }
+
+    currentPdfFile = file;
+    pdfStatus.textContent = "Selected: " + file.name;
+    pdfStatus.className = "status ok";
+    pdfInfoOriginal.textContent = "Original size: " + formatBytes(file.size);
+    pdfResultStatus.textContent = "";
+    pdfNameInput.value = file.name.replace(/\.pdf$/i, "") + "-compressed";
+  });
+
+  clearPdfBtn.addEventListener("click", () => {
+    currentPdfFile = null;
+    compressedPdfBlob = null;
+    pdfInput.value = "";
+    pdfStatus.textContent = "No PDF selected.";
+    pdfStatus.className = "status";
+    pdfInfoOriginal.textContent = "Original size: -";
+    pdfInfoCompressed.textContent = "Compressed size: -";
+    pdfResultStatus.textContent = "";
+    pdfNameInput.value = "";
+  });
+
+  compressPdfBtn.addEventListener("click", async () => {
+    if (!currentPdfFile) {
+      pdfResultStatus.textContent = "Please select a PDF file first.";
+      pdfResultStatus.className = "status error";
+      return;
+    }
+
+    const quality = Number(pdfQualitySlider.value) / 100;
+    const scale   = Number(pdfScaleSlider.value) || 1.2;
+    const { jsPDF } = window.jspdf;
+
+    pdfResultStatus.textContent = "Compressing... this may take a moment.";
+    pdfResultStatus.className = "status";
+
+    try {
+      const arrayBuffer = await fileToArrayBuffer(currentPdfFile);
+      const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4"
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+        pdfResultStatus.textContent = `Processing page ${pageNum} of ${pdfDoc.numPages}...`;
+
+        // ✅ FIXED: use pdfDoc.getPage, not pdf.getPage
+        const page = await pdfDoc.getPage(pageNum);
+
+        const viewport = page.getViewport({ scale });
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        await page.render({ canvasContext: ctx, viewport }).promise;
+
+        const imgDataUrl = canvas.toDataURL("image/jpeg", quality);
+        const dims = { width: canvas.width, height: canvas.height };
+
+        const ratio = Math.min(pageWidth / dims.width, pageHeight / dims.height);
+        const pdfW = dims.width * ratio;
+        const pdfH = dims.height * ratio;
+        const x = (pageWidth - pdfW) / 2;
+        const y = (pageHeight - pdfH) / 2;
+
+        if (pageNum > 1) pdf.addPage();
+        pdf.addImage(imgDataUrl, "JPEG", x, y, pdfW, pdfH);
+      }
+
+      compressedPdfBlob = pdf.output("blob");
+      pdfInfoCompressed.textContent = "Compressed size: " + formatBytes(compressedPdfBlob.size);
+      pdfResultStatus.textContent = "Compression done. Click “Download compressed PDF”.";
+      pdfResultStatus.className = "status ok";
+    } catch (err) {
+      console.error(err);
+      compressedPdfBlob = null;
+      pdfInfoCompressed.textContent = "Compressed size: -";
+      pdfResultStatus.textContent = "Error compressing PDF. Try a different file.";
+      pdfResultStatus.className = "status error";
+    }
+  });
+
+  downloadPdfBtn.addEventListener("click", () => {
+    if (!compressedPdfBlob) {
+      pdfResultStatus.textContent = "Compress the PDF first.";
+      pdfResultStatus.className = "status error";
+      return;
+    }
+    const outputName = (pdfNameInput.value || "compressed-document").trim() || "compressed-document";
+    const url = URL.createObjectURL(compressedPdfBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = outputName + ".pdf";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    pdfResultStatus.textContent = "Compressed PDF downloaded.";
+    pdfResultStatus.className = "status ok";
+  });
+
+  /* ========== IMAGE COMPRESSOR ========== */
+
+  const imgInput          = document.getElementById("imgInput");
+  const imgStatus         = document.getElementById("imgStatus");
+  const imgInfoOriginal   = document.getElementById("imgInfoOriginal");
+  const imgInfoCompressed = document.getElementById("imgInfoCompressed");
+  const imgResultStatus   = document.getElementById("imgResultStatus");
+
+  const imgQualitySlider  = document.getElementById("imgQualitySlider");
+  const imgQualityInput   = document.getElementById("imgQualityInput");
+  const imgQualityValue   = document.getElementById("imgQualityValue");
+
+  const imgPreviewWrapper = document.getElementById("imgPreviewWrapper");
+  const imgPreview        = document.getElementById("imgPreview");
+
+  const compressImgBtn    = document.getElementById("compressImgBtn");
+  const downloadImgBtn    = document.getElementById("downloadImgBtn");
+
+  const imgCanvas         = document.getElementById("imgCanvas");
+  const imgCtx            = imgCanvas.getContext("2d");
+
+  let originalImgFile = null;
+  let compressedDataUrl = null;
+
+  function syncImgQualityFromSlider() {
+    const val = Number(imgQualitySlider.value);
+    imgQualityInput.value = val;
+    imgQualityValue.textContent = val + "%";
+  }
+  function syncImgQualityFromInput() {
+    let val = Number(imgQualityInput.value);
+    if (isNaN(val)) val = 80;
+    if (val < 1) val = 1;
+    if (val > 100) val = 100;
+    imgQualityInput.value = val;
+    imgQualitySlider.value = val;
+    imgQualityValue.textContent = val + "%";
+  }
+  imgQualitySlider.addEventListener("input", syncImgQualityFromSlider);
+  imgQualityInput.addEventListener("input", syncImgQualityFromInput);
+  syncImgQualityFromSlider();
+
+  imgInput.addEventListener("change", function () {
+    const file = this.files[0];
+    compressedDataUrl = null;
+    imgInfoCompressed.textContent = "Compressed size: -";
+
+    if (!file) {
+      imgStatus.textContent = "No image selected.";
+      imgStatus.className = "status";
+      originalImgFile = null;
+      imgPreviewWrapper.style.display = "none";
+      imgInfoOriginal.textContent = "Original size: -";
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      imgStatus.textContent = "Please select a valid image file.";
+      imgStatus.className = "status error";
+      this.value = "";
+      originalImgFile = null;
+      imgPreviewWrapper.style.display = "none";
+      imgInfoOriginal.textContent = "Original size: -";
+      return;
+    }
+
+    originalImgFile = file;
+    imgStatus.textContent = "Selected: " + file.name;
+    imgStatus.className = "status ok";
+    imgInfoOriginal.textContent = "Original size: " + formatBytes(file.size);
+    imgResultStatus.textContent = "";
+
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = function () {
+      const maxW = 800;
+      const maxH = 600;
+      let w = img.width;
+      let h = img.height;
+      const r = Math.min(maxW / w, maxH / h, 1);
+      w = Math.round(w * r);
+      h = Math.round(h * r);
+
+      imgCanvas.width = w;
+      imgCanvas.height = h;
+      imgCtx.clearRect(0, 0, w, h);
+      imgCtx.drawImage(img, 0, 0, w, h);
+
+      imgPreview.src = imgCanvas.toDataURL("image/jpeg", 0.95);
+      imgPreviewWrapper.style.display = "block";
+      imgInfoCompressed.textContent = "Compressed size: -";
+      compressedDataUrl = null;
+
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = function () {
+      imgStatus.textContent = "Could not load image.";
+      imgStatus.className = "status error";
+    };
+    img.src = url;
+  });
+
+  compressImgBtn.addEventListener("click", () => {
+    if (!originalImgFile) {
+      imgResultStatus.textContent = "Please select an image first.";
+      imgResultStatus.className = "status error";
+      return;
+    }
+
+    const q = Number(imgQualitySlider.value) / 100;
+    compressedDataUrl = imgCanvas.toDataURL("image/jpeg", q);
+    imgPreview.src = compressedDataUrl;
+
+    const sizeInBytes = Math.round((compressedDataUrl.length * 3) / 4);
+    imgInfoCompressed.textContent = "Compressed size: " + formatBytes(sizeInBytes);
+    imgResultStatus.textContent = "Image compressed. Click “Download compressed JPG”.";
+    imgResultStatus.className = "status ok";
+  });
+
+  downloadImgBtn.addEventListener("click", () => {
+    if (!compressedDataUrl) {
+      imgResultStatus.textContent = "Compress the image first.";
+      imgResultStatus.className = "status error";
+      return;
+    }
+    const link = document.createElement("a");
+    link.href = compressedDataUrl;
+    link.download = "compressed-image.jpg";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    imgResultStatus.textContent = "Compressed image downloaded.";
+    imgResultStatus.className = "status ok";
+  });
+</script>
+
+</body>
+</html>
